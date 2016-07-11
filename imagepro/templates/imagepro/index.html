@@ -10,6 +10,7 @@
   <link rel="stylesheet" type="text/css" href="{% static 'imagepro/style.css' %}" />
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
 </head>
 
 <body>
@@ -37,17 +38,28 @@
 <!-- First Container -->
 <div class="container-fluid bg-1 text-center" id="impro">
   <h3 class="margin" id="impro">Image Processing</h3>
-  <a href="#" class="btn btn-default btn-lg">
-    <span class="glyphicon glyphicon-picture"></span>   Open
-  </a>
+
+  <div class="row">
+    <div class="col-sm-4">    </div>
+    <div class="col-sm-4">
+      <div class="form-group">
+        <span class="glyphicon glyphicon-picture"></span>
+        <label> image directory:</label>
+        <input type="text" class="form-control" id="usr">
+      </div>
+    </div>
+    <div class="col-sm-4">    </div>
+  </div>
+
+
   <div class="row">
     <div class="col-sm-6">
       <p>RBG</p>
-      <img src="{% static 'imagepro/bibme0_original.png' %}" class="img-responsive margin" style="width:100%" alt="Image">
+      <img src="{% static 'imagepro/sample_original.png' %}" class="center-block" style="width:50%" alt="Image">
     </div>
     <div class="col-sm-6">
       <p>Grayscale</p>
-      <img src="{% static 'imagepro/bibme0_gray.png' %}" class="img-responsive margin" style="width:100%" alt="Image">
+      <img src="{% static 'imagepro/sample_gray.png' %}" class="center-block" style="width:50%" alt="Image">
     </div>
   </div>
   <!--p>Please select one image processing techique</p-->
