@@ -10,6 +10,39 @@
   <link rel="stylesheet" type="text/css" href="{% static 'imagepro/style.css' %}" />
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script src="http://eda3367a.fanoutcdn.com/bayeux/static/faye-browser-min.js"></script>
+  <script src="http://www.w3schools.com/lib/w3data.js"></script>
+<script>
+$(document).ready(function(){
+    $("#terminal-btn").click(function(){
+        $("#terminal").toggle();
+    });
+    $(function(){
+      refresh();
+    });
+});
+
+window.setInterval(function() {
+  var elem = document.getElementById('terminal-content');
+  elem.scrollTop = elem.scrollHeight;
+}, 1000);
+
+/*var client = new Faye.Client('http://eda3367a.fanoutcdn.com/bayeux');
+client.subscribe('/test', function (data) {
+    //alert('got data: ' + data);
+    $('#output').text(data);
+});*/
+function refresh() {
+    $.ajax({
+        url: '{% url 'terminal' %}',
+        success: function(data) {
+            $('#terminal-content').html(data);
+        }
+    });
+    setInterval("refresh()", 1000);
+}
+
+</script>
 
 </head>
 
@@ -27,6 +60,9 @@
     </div>
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav navbar-right">
+        <li><a href="#impro">
+	    <span id="terminal-btn" class="glyphicon glyphicon-credit-card"></span>
+	</a></li>
         <li><a href="#impro">Image Processing</a></li>
         <li><a href="#cluster">Clustering</a></li>
         <li><a href="#option">+</a></li>
@@ -35,10 +71,20 @@
   </div>
 </nav>
 
+<!-- Terminal Container-->
+<div id="terminal" style="display:none;">
+  <div id="terminal-content">
+    <!--div w3-include-html="{% url 'terminal' %}"></div--> 
+    <!--script>
+      w3IncludeHTML();
+    </script-->
+    {% include 'imagepro/terminal.html'%}
+  </div>
+</div>
+
 <!-- First Container -->
 <div class="container-fluid bg-1 text-center" id="impro">
   <h3 class="margin" id="impro">Image Processing</h3>
-
   <div class="row">
     <div class="col-sm-4">    </div>
     <div class="col-sm-4">

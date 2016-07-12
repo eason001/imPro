@@ -26,6 +26,8 @@ TEMPLATE_DEBUG = True
 
 ALLOWED_HOSTS = []
 
+FANOUT_REALM = 'eda3367a'
+FANOUT_KEY = '9SYh5iZ8uZmKxAw81uxGNQ=='
 
 # Application definition
 
