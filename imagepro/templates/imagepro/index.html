@@ -11,38 +11,9 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
   <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
   <script src="http://eda3367a.fanoutcdn.com/bayeux/static/faye-browser-min.js"></script>
-  <script src="http://www.w3schools.com/lib/w3data.js"></script>
-<script>
-$(document).ready(function(){
-    $("#terminal-btn").click(function(){
-        $("#terminal").toggle();
-    });
-    $(function(){
-      refresh();
-    });
-});
-
-window.setInterval(function() {
-  var elem = document.getElementById('terminal-content');
-  elem.scrollTop = elem.scrollHeight;
-}, 1000);
-
-/*var client = new Faye.Client('http://eda3367a.fanoutcdn.com/bayeux');
-client.subscribe('/test', function (data) {
-    //alert('got data: ' + data);
-    $('#output').text(data);
-});*/
-function refresh() {
-    $.ajax({
-        url: '{% url 'terminal' %}',
-        success: function(data) {
-            $('#terminal-content').html(data);
-        }
-    });
-    setInterval("refresh()", 1000);
-}
-
-</script>
+  <script src= "http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+  <script src= "https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0-beta.1/angular-cookies.js"></script>
+  <script src="{% static 'imagepro/main.js' %}"></script>
 
 </head>
 
@@ -64,65 +35,98 @@ function refresh() {
 	    <span id="terminal-btn" class="glyphicon glyphicon-credit-card"></span>
 	</a></li>
         <li><a href="#impro">Image Processing</a></li>
+        <li><a href="#dimre">Dimension Reduction</a></li>
         <li><a href="#cluster">Clustering</a></li>
-        <li><a href="#option">+</a></li>
       </ul>
     </div>
   </div>
 </nav>
 
-<!-- Terminal Container-->
-<div id="terminal" style="display:none;">
-  <div id="terminal-content">
-    <!--div w3-include-html="{% url 'terminal' %}"></div--> 
-    <!--script>
-      w3IncludeHTML();
-    </script-->
-    {% include 'imagepro/terminal.html'%}
-  </div>
-</div>
 
 <!-- First Container -->
-<div class="container-fluid bg-1 text-center" id="impro">
+<div class="container-fluid bg-1 text-center" id="impro" ng-app="myApp" ng-controller="appCtrl">
   <h3 class="margin" id="impro">Image Processing</h3>
+  <form role="form-inline" action="{% url 'imagepro:index' %}" method="get">
+{% csrf_token %}
+
   <div class="row">
-    <div class="col-sm-4">    </div>
+    <div class="col-sm-4"> <div class="pull-right"><span class="glyphicon glyphicon-picture"></span> Image dir</div></div>
     <div class="col-sm-4">
-      <div class="form-group">
-        <span class="glyphicon glyphicon-picture"></span>
-        <label> image directory:</label>
-        <input type="text" class="form-control" id="usr">
-      </div>
+      <input type="text" ng-model="img_path" ng-change="change($event)" id="product" class="form-control" id="img_path" name="img_path" value="">
     </div>
-    <div class="col-sm-4">    </div>
+    <div class="col-sm-4"><div class="pull-left">{$ img_info $}</div></div>
   </div>
 
 
-  <div class="row">
-    <div class="col-sm-6">
-      <p>RBG</p>
-      <img src="{% static 'imagepro/sample_original.png' %}" class="center-block" style="width:50%" alt="Image">
+  <div class="row" id="filters_selector">
+    <div class="col-sm-4">
+      <div class="pull-right" style="padding-top: 20px">
+	<div class="radio" style="text-align: left">
+  	  <label>
+   	   <input type="radio" name="filter" id="grayscale" value="grayscale" checked="checked">
+		Grayscale
+  	  </label>
+	</div>
+	<div class="radio" style="text-align: left">
+  	  <label>
+   	   <input type="radio" name="filter" id="sobel" value="sobel">
+		Sobel filter
+  	  </label>
+	</div>
+	<div class="radio" style="text-align: left">
+  	  <label>
+   	   <input type="radio" name="filter" id="roberts" value="roberts">
+		Roberts filter
+  	  </label>
+	</div>
+	<div class="radio" style="text-align: left">
+  	  <label>
+   	   <input type="radio" name="filter" id="canny" value="canny">
+		Canny filter
+  	  </label>
+	</div>
+    	<div class="radio" style="text-align: left">
+  	  <label>
+   	   <input type="radio" name="filter" id="contour" value="contour">
+		Contour Detection
+  	  </label>
+	</div>
+    	<div class="radio" style="text-align: left">
+  	  <label>
+   	   <input type="radio" name="filter" id="skeleton" value="skeleton">
+		Skeleton Detection
+  	  </label>
+	</div>
+       </div>
     </div>
-    <div class="col-sm-6">
-      <p>Grayscale</p>
-      <img src="{% static 'imagepro/sample_gray.png' %}" class="center-block" style="width:50%" alt="Image">
+    <div class="col-sm-4">
+      <p>Original</p>
+      <img id="original" src="{% static 'imagepro/sample_original.png' %}" class="center-block" style="width:50%" alt="Image">
+    </div>
+    <div class="col-sm-4">
+	<div class="pull-left" style="align-text:left">
+      <p>Transformed</p>
+      <img id="transformed" src="{% static 'imagepro/sample_gray.png' %}" class="center-block" style="width:50%" alt="Image">
+	</div>
     </div>
   </div>
-  <!--p>Please select one image processing techique</p-->
+  </br>
+    <button type="submit" class="btn btn-default" name="option" value="1">
+       <span id="terminal-btn" class="glyphicon glyphicon-play"> Run</span>
+    </button>
+  </form>
 </div>
 
 <!-- Second Container -->
-<div class="container-fluid bg-2 text-center" id="cluster">
-  <h3 class="margin">Clustering</h3>
-  <p>Please select one clustering algorithm</p>
-  <a href="#" class="btn btn-default btn-lg">
-    <span class="glyphicon glyphicon-folder-open"></span>   Open
-  </a>
+<div class="container-fluid bg-2 text-center" id="dimre">
+  <h3 class="margin">Dimension Reduction</h3>
+  <img src="{% static 'imagepro/csoon.jpg' %}" class="img-responsive img-circle margin" style="display:inline" alt="Coming soon . . ." width="350" height="350">
+  <h3>. . .</h3>
 </div>
 
 <!-- Third Container (Grid) -->
-<div class="container-fluid bg-3 text-center" id="option">
-  <h3 class="margin">Coming soon . . .</h3><br>
+<div class="container-fluid bg-3 text-center" id="cluster">
+  <h3 class="margin">Clustering</h3><br>
   <img src="{% static 'imagepro/csoon.jpg' %}" class="img-responsive img-circle margin" style="display:inline" alt="Coming soon . . ." width="350" height="350">
   <h3>. . .</h3>
 </div>
@@ -132,7 +136,46 @@ function refresh() {
   <p> Made By Yi Ren Cheng</p>
 </footer>
 
+<!-- Terminal Container-->
+<div id="terminal" style="display:none;">
+  <div id="terminal-content">
+	imPro Terminal v1.0.1
+  </div>
+</div>
+<!--script>
+var app = angular.module("myApp", []).config(function($interpolateProvider) {
+  $interpolateProvider.startSymbol('{$');
+  $interpolateProvider.endSymbol('$}');
+});
+
+app.controller('appCtrl', function($scope, $http) {
+    var config = {
+                headers : {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
+                },
+                xsrfHeaderName: 'X-CSRFToken',
+                xsrfCookieName: 'csrftoken'
+            }
+
+    $scope.change = function($event) {
+        var data = {
+            img_path: $scope.img_path
+        };
+        var config = {
+                params: data
+            };
+        $http.get('{% url 'imagepro:index' %}?img_path=' + $scope.img_path)
+        .success(function(response) {
+            $scope.img_info = response.img_info;
+	})
+        .error(function (data, status, header, config) {
+            $scope.state = 'Please select an App or a Batch.';
+        });
+       // alert($scope.appID);
+    };
+});
+
+</script-->
+
 </body>
 </html>
-
-
