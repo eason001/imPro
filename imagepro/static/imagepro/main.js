@@ -27,7 +27,10 @@ $(document).ready(function(){
             }
             if(value == 'canny'){
                 image_name = "sample_canny.png";
-            }
+                $("#canny_gamma").show();
+            }else{
+                $("#canny_gamma").hide();		
+		}
             if(value == 'contour'){
                 image_name = "sample_contour.png";
             }
@@ -46,11 +49,13 @@ window.setInterval(function() {
   elem.scrollTop = elem.scrollHeight;
 }, 1000);
 */
-//var client = new Faye.Client('http://eda3367a.fanoutcdn.com/bayeux');
-//client.subscribe('/test', function (data) {
-    //alert('got data: ' + data);
-//    $('#output').text(data);
-//});
+/*
+var client = new Faye.Client('http://eda3367a.fanoutcdn.com/bayeux');
+client.subscribe('/test', function (data) {
+    alert('got data: ' + data);
+    $('#output').text(data);
+});
+*/
 function refresh() {
     $.ajax({
         url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/terminal/',
@@ -87,8 +92,7 @@ app.controller('appCtrl', function($scope, $http) {
             $scope.img_info = response.img_info;
         })
         .error(function (data, status, header, config) {
-            $scope.state = 'Please select an App or a Batch.';
+            $scope.img_info = 'Please enter a valid image directory';
         });
-       // alert($scope.appID);
     };
 });

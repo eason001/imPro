@@ -2,7 +2,7 @@
 <html lang="en">
 {% load staticfiles %}
 <head>
-  <title>imPro</title>
+  <title>imPro v1.0.1</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
@@ -45,7 +45,7 @@
 
 <!-- First Container -->
 <div class="container-fluid bg-1 text-center" id="impro" ng-app="myApp" ng-controller="appCtrl">
-  <h3 class="margin" id="impro">Image Processing</h3>
+  <h1 class="margin" id="impro">Image Processing</h1>
   <form role="form-inline" action="{% url 'imagepro:index' %}" method="get">
 {% csrf_token %}
 
@@ -84,6 +84,9 @@
    	   <input type="radio" name="filter" id="canny" value="canny">
 		Canny filter
   	  </label>
+         <div class="form-group" id="canny_gamma" style="display:none">
+        	 a = <input type="text" id="gamma_input" name="canny_gamma" value="1">
+	 </div>
 	</div>
     	<div class="radio" style="text-align: left">
   	  <label>
@@ -115,6 +118,8 @@
        <span id="terminal-btn" class="glyphicon glyphicon-play"> Run</span>
     </button>
   </form>
+
+  <h3>{{ result }}</h3>
 </div>
 
 <!-- Second Container -->
@@ -142,40 +147,6 @@
 	imPro Terminal v1.0.1
   </div>
 </div>
-<!--script>
-var app = angular.module("myApp", []).config(function($interpolateProvider) {
-  $interpolateProvider.startSymbol('{$');
-  $interpolateProvider.endSymbol('$}');
-});
-
-app.controller('appCtrl', function($scope, $http) {
-    var config = {
-                headers : {
-                    'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
-                },
-                xsrfHeaderName: 'X-CSRFToken',
-                xsrfCookieName: 'csrftoken'
-            }
-
-    $scope.change = function($event) {
-        var data = {
-            img_path: $scope.img_path
-        };
-        var config = {
-                params: data
-            };
-        $http.get('{% url 'imagepro:index' %}?img_path=' + $scope.img_path)
-        .success(function(response) {
-            $scope.img_info = response.img_info;
-	})
-        .error(function (data, status, header, config) {
-            $scope.state = 'Please select an App or a Batch.';
-        });
-       // alert($scope.appID);
-    };
-});
-
-</script-->
 
 </body>
 </html>
