@@ -68,13 +68,13 @@ body {
     padding-top: 20px;
 }
 
-#canny_gamma{
+#canny_sigma{
     padding-left: 20px;
 }
-#gamma_input{
+#canny_sigma_input{
     box-sizing: border-box;
     height: 35px;
-    width: 30px;
+    width: 50px;
     border: 2px solid #ffffff;
     border-radius: 4px;
     color: #000000;

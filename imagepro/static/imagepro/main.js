@@ -27,9 +27,9 @@ $(document).ready(function(){
             }
             if(value == 'canny'){
                 image_name = "sample_canny.png";
-                $("#canny_gamma").show();
+                $("#canny_sigma").show();
             }else{
-                $("#canny_gamma").hide();		
+                $("#canny_sigma").hide();		
 		}
             if(value == 'contour'){
                 image_name = "sample_contour.png";

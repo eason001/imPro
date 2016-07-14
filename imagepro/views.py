@@ -6,36 +6,70 @@ import os
 #from django.template.context_processors import csrf
 import json
 from django.http import HttpResponse
+from skimage.color.adapt_rgb import adapt_rgb, each_channel, hsv_value
+from PIL import Image
+from skimage import filters
+from skimage.color import rgb2gray
+from skimage import feature
+from skimage import io
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage.exposure import rescale_intensity
+from scipy import ndimage as ndi
+import math
+from skimage.morphology import skeletonize
 
-#log_file = "/home/ubuntu/yi-imPro/imagepro/static/imagepro/logfile.txt"
-#fanout.publish('test', 'Test publish!')
+def as_gray(image_filter, image, *args, **kwargs):
+    gray_image = rgb2gray(image)
+    return image_filter(gray_image, *args, **kwargs)
+
+@adapt_rgb(as_gray)
+def original_gray(image):
+    return image
+
+@adapt_rgb(as_gray)
+def skeleton_gray(image):
+    return skeletonize(image)
+
+@adapt_rgb(as_gray)
+def canny_gray(image,p):
+    return feature.canny(image,sigma=p)
+
+@adapt_rgb(as_gray)
+def sobel_gray(image):
+    return filters.sobel(image)
+
+@adapt_rgb(as_gray)
+def roberts_gray(image):
+    return filters.roberts(image)
 
 def index(request):
     result = ""
     option = request.GET.get("option",0)
-    print "option: " + str(option)
     img_path = request.GET.get("img_path","").strip()
+    canny_sigma = request.GET.get("canny_sigma",1)
     img_counter = 0
+    print "option: " + str(option) + " path: " + img_path
 
     if option == '1' and os.path.isdir(img_path):
 	filter = request.GET.get("filter","grayscale")
 	print "filter: " + filter	
-	if filter == 'grayscale':
-	        context = grayscale(img_path)
-		
+	
+	context = transform(img_path,filter,canny_sigma)		
         return render(request, 'imagepro/index.html', context)
-
 
     if  img_path == "":
 	img_info = "please input a valid image directory"
         data = {'img_info': img_info}
+    
     elif not os.path.isdir(img_path):
 	img_info = "invalid directory"
         data = {'img_info': img_info}
 	return HttpResponse(json.dumps(data), content_type='application/json')
+    
     else:
-        for file in img_path:
-		if ".png" or ".jpg" in file:
+        for file in os.listdir(img_path):
+		if file.lower().endswith(('.png','.jpg','.jpeg','.gif')):
 			img_counter += 1
         img_info = str(img_counter) + " images found"
         data = {'img_info': img_info}
@@ -47,14 +81,12 @@ def index(request):
     return render(request, 'imagepro/index.html', context)
 
 def terminal(request):
-    #logfile = open(log_file,'r').read()
     logfile = "imPro v1.0.1 \n Terminal loading  . . ."
     context = {'log': logfile, 'test': 'hello <br/> world'}
     return render(request, 'imagepro/terminal.html', context)
 
 
-def grayscale(inputpath):
-	from PIL import Image
+def transform(inputpath,filter,canny_sigma):
 
         T_size = (80,20)
         L_size = (35,65)
@@ -66,15 +98,36 @@ def grayscale(inputpath):
 
         counter = 0
         max_count = 2
-
-	cutfile = open(inputpath + '/processed_data', 'w')
+	if not os.path.exists(inputpath+'/impro_out/'):
+    	  os.makedirs(inputpath+'/impro_out/')
+	
+	if filter == 'canny':
+	        cutfile = open(inputpath + '/impro_out/' + filter + canny_sigma + '_processed_data', 'w')
+        cutfile = open(inputpath + '/impro_out/' + filter + '_processed_data', 'w')
 
         for file in os.listdir(inputpath):
-          if '.png' or '.jpg' in file:
+	  if file.lower().endswith(('.png','.jpg','.jpeg','.gif')):
             try:    
 		print("compressing..." + file)
                 im = Image.open(inputpath + "/" + file)
                 cutfile.write(file.split(".")[0])
+	####Filters####
+		if filter == 'grayscale':
+			im = original_gray(np.array(im))
+			im = Image.fromarray(np.uint8(im*255))
+		if filter == 'sobel':
+			im = 1-sobel_gray(np.array(im))
+			im = Image.fromarray(np.uint8(im*255))
+		if filter == 'roberts':
+			im = 1-roberts_gray(np.array(im))
+			im = Image.fromarray(np.uint8(im*255))
+		if filter == 'canny':
+			im = 1-canny_gray(np.array(im),canny_sigma)
+			im = Image.fromarray(np.uint8(im*255))
+		if filter == 'skeleton':
+			im = 1-skeleton_gray(np.array(im))
+			im = Image.fromarray(np.uint8(im*255))
+
 
         ######TOP REGION######
                 region = im.crop(T_box)
@@ -118,9 +171,15 @@ def grayscale(inputpath):
 		continue
     
         cutfile.close()
-
-	inputfile = open(inputpath + '/processed_data', 'r')
+	
+	if filter == 'canny':
+		path = inputpath +  '/impro_out/' + filter + canny_sigma + '_processed_data'
+	else:
+		path = inputpath +  '/impro_out/' + filter + '_processed_data'
+	inputfile = open(path, 'r')
+	file_size = str(os.stat(path).st_size )
 	counter = 0
+	
 	for line in inputfile:
                 input_n = len(line.split(" "))
                 n_features = str(input_n)
@@ -130,7 +189,9 @@ def grayscale(inputpath):
         inputfile.close()
         n_data = str(counter)
 	print "processed data set: " + n_data + " x " + n_features
-	result = "processed data set: " + n_data + " x " + n_features + " is saved as " + inputpath + "/processed_data"
+	if filter == 'canny':
+		result = "processed data set: " + n_data + " x " + n_features + " is saved as \n" + inputpath +  '/impro_out/' + filter + canny_sigma + '_processed_data ' + file_size + ' bytes'
+	result = "processed data set: " + n_data + " x " + n_features + " is saved as \n" + inputpath +  '/impro_out/' + filter + '_processed_data ' + file_size + ' bytes'
 
         context = {'n_data': n_data, 'n_features': n_features, 'result': result}
 	return context
