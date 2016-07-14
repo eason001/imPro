@@ -51,12 +51,13 @@ def index(request):
     img_counter = 0
     print "option: " + str(option) + " path: " + img_path
 
-    if option == '1' and os.path.isdir(img_path):
+    if option == '1' and os.path.isdir(img_path) and img_path != "/":
 	filter = request.GET.get("filter","grayscale")
 	print "filter: " + filter	
 	
 	context = transform(img_path,filter,canny_sigma)		
-        return render(request, 'imagepro/index.html', context)
+	return HttpResponse(json.dumps(context), content_type='application/json')
+#        return render(request, 'imagepro/index.html', context)
 
     if  img_path == "":
 	img_info = "please input a valid image directory"
@@ -87,7 +88,7 @@ def terminal(request):
 
 
 def transform(inputpath,filter,canny_sigma):
-
+        
         T_size = (80,20)
         L_size = (35,65)
         R_size = (35,65)
@@ -100,18 +101,26 @@ def transform(inputpath,filter,canny_sigma):
         max_count = 2
 	if not os.path.exists(inputpath+'/impro_out/'):
     	  os.makedirs(inputpath+'/impro_out/')
-	
+
+	n_files = 0
+	for file in os.listdir(inputpath):
+                if file.lower().endswith(('.png','.jpg','.jpeg','.gif')):
+                        n_files += 1
+
+	i = 0
 	if filter == 'canny':
 	        cutfile = open(inputpath + '/impro_out/' + filter + canny_sigma + '_processed_data', 'w')
         cutfile = open(inputpath + '/impro_out/' + filter + '_processed_data', 'w')
 
         for file in os.listdir(inputpath):
 	  if file.lower().endswith(('.png','.jpg','.jpeg','.gif')):
-            try:    
-		print("compressing..." + file)
+            
+	    try:
+		i += 1    
+		print("compressing..." + file + ' ' +  str(i) + '/' + str(n_files))
                 im = Image.open(inputpath + "/" + file)
                 cutfile.write(file.split(".")[0])
-	####Filters####
+	######Filters####
 		if filter == 'grayscale':
 			im = original_gray(np.array(im))
 			im = Image.fromarray(np.uint8(im*255))
@@ -179,7 +188,7 @@ def transform(inputpath,filter,canny_sigma):
 	inputfile = open(path, 'r')
 	file_size = str(os.stat(path).st_size )
 	counter = 0
-	
+	n_features = '0'	
 	for line in inputfile:
                 input_n = len(line.split(" "))
                 n_features = str(input_n)
@@ -188,10 +197,10 @@ def transform(inputpath,filter,canny_sigma):
 
         inputfile.close()
         n_data = str(counter)
-	print "processed data set: " + n_data + " x " + n_features
 	if filter == 'canny':
 		result = "processed data set: " + n_data + " x " + n_features + " is saved as \n" + inputpath +  '/impro_out/' + filter + canny_sigma + '_processed_data ' + file_size + ' bytes'
 	result = "processed data set: " + n_data + " x " + n_features + " is saved as \n" + inputpath +  '/impro_out/' + filter + '_processed_data ' + file_size + ' bytes'
+	print result
 
         context = {'n_data': n_data, 'n_features': n_features, 'result': result}
 	return context

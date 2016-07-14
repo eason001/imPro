@@ -7,6 +7,7 @@ $(document).ready(function(){
        event.preventDefault();
        return false;
      }
+
     });
 /*    
     $(function(){
@@ -42,6 +43,38 @@ $(document).ready(function(){
         });
 
 
+//function imgproRun(){
+$("#imgrun-btn").click(function(){  
+    $('#loading').show();
+    var radios = document.getElementsByName('filter'), 
+        value  = '';
+
+    for (var i = radios.length; i--;) {
+        if (radios[i].checked) {
+            value = radios[i].value;
+            break;
+        }
+    }
+    $.ajax({
+	type: "GET",
+        url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/?img_path=' + $('#img_path').val() + "&filter=" + value + "&canny_sigma" + $('#canny_sigma_input').val() + "&option=" + $('#imgrun-btn').val(),
+        dataType: "json",
+	async: true,
+	success: function(data) {
+	     $('#imgproResult').html(data.result); 
+	     $('#loading').hide();
+        }
+    });
+});
+//}
+
+
+
+
+
+
+
+
 });
 /*
 window.setInterval(function() {
@@ -65,6 +98,22 @@ function refresh() {
     });
     setInterval("refresh()", 5000);
 }
+
+//function imgproRun(){
+$("#imgrun-btn").click(function(){  
+    $('#loading').show();
+    $.ajax({
+	type: "GET",
+        url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/?img_path=' + $('img_path').val() + "&filter=" + $('input[name=filter]').val() + "&canny_sigma" + $('#canny_sigma_input').val() + "&option=" + $('#imgrun-btn').val(),
+        dataType: "json",
+	async: true,
+	success: function(data) {
+	   $('#loading').hide();
+        }
+    });
+//}
+});
+
 
 var app = angular.module("myApp", []).config(function($interpolateProvider) {
   $interpolateProvider.startSymbol('{$');
