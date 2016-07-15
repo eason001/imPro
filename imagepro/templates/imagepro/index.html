@@ -2,7 +2,7 @@
 <html lang="en">
 {% load staticfiles %}
 <head>
-  <title>imPro v1.0.1</title>
+  <title>imPro v1.0.2</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
@@ -14,7 +14,6 @@
   <script src= "http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
   <script src= "https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.0-beta.1/angular-cookies.js"></script>
   <script src="{% static 'imagepro/main.js' %}"></script>
-
 </head>
 
 <body>
@@ -42,10 +41,31 @@
   </div>
 </nav>
 
+<!-- Modal -->
+  <div class="modal fade" id="img-output" role="dialog">
+    <div class="modal-dialog modal-lg">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">OUTPUT DATA</h4>
+        </div>
+        <div class="modal-body">
+         <div id='imgproResult'> {{ result|linebreaks }}</div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
 
 <!-- First Container -->
 <div class="container-fluid bg-1 text-center" id="impro" ng-app="myApp" ng-controller="appCtrl">
-  <h1 class="margin" id="impro">Image Processing</h1>
+  <h1 class="margin" id="impro"></h1>
   <!--form role="form-inline" action="{% url 'imagepro:index' %}" method="get"-->
   <form role="form-inline">
 {% csrf_token %}
@@ -55,7 +75,7 @@
     <div class="col-sm-4">
       <input type="text" ng-model="img_path" ng-change="change($event)" id="img_path" class="form-control" id="img_path" name="img_path" value="">
     </div>
-    <div class="col-sm-4"><div class="pull-left">{$ img_info $}</div></div>
+    <div class="col-sm-4"><div class="pull-left" id="img_info">{$ img_info $}</div></div>
   </div>
 
 
@@ -124,7 +144,6 @@
       <h3>Please Wait . . .</h3>
       <img src="{% static 'imagepro/ajax-loader.gif'%}" alt="loading" />
     </div>
-    <h3 id="imgproResult">{{ result|linebreaks }}</h3>
   </div>
 </div>
 
@@ -149,8 +168,10 @@
 
 <!-- Terminal Container-->
 <div id="terminal" style="display:none;">
-  <div id="terminal-content">
-	imPro Terminal v1.0.1
+  <div id="terminal-title">
+	imPro Log v1.0.1
+  </div>
+  <div id="terminal-body">
   </div>
 </div>
 

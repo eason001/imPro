@@ -7,8 +7,12 @@ $(document).ready(function(){
        event.preventDefault();
        return false;
      }
-
     });
+
+  var elem = document.getElementById('terminal-body');
+  elem.scrollTop = elem.scrollHeight;
+
+
 /*    
     $(function(){
       refresh();
@@ -43,8 +47,8 @@ $(document).ready(function(){
         });
 
 
-//function imgproRun(){
 $("#imgrun-btn").click(function(){  
+if($('img_path').val()!='/' && $('img_info').html()!='invalid directory' && $('img_path').val()!=''){
     $('#loading').show();
     var radios = document.getElementsByName('filter'), 
         value  = '';
@@ -57,16 +61,24 @@ $("#imgrun-btn").click(function(){
     }
     $.ajax({
 	type: "GET",
-        url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/?img_path=' + $('#img_path').val() + "&filter=" + value + "&canny_sigma" + $('#canny_sigma_input').val() + "&option=" + $('#imgrun-btn').val(),
+        url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/?img_path=' + $('#img_path').val() + "&filter=" + value + "&canny_sigma=" + $('#canny_sigma_input').val() + "&option=" + $('#imgrun-btn').val(),
         dataType: "json",
 	async: true,
 	success: function(data) {
+	     var now = new Date($.now());
+	     var log_data = $('#terminal-body').html() + "</br></br>"
+	     log_data = log_data + now + " </br> " + data.result
+	     $('#terminal-body').html(log_data);
 	     $('#imgproResult').html(data.result); 
 	     $('#loading').hide();
+	     $('#img-output').modal('show');
+ 	     var elem = document.getElementById('terminal-body');
+	     elem.scrollTop = elem.scrollHeight;
         }
     });
+}
+
 });
-//}
 
 
 
@@ -99,20 +111,6 @@ function refresh() {
     setInterval("refresh()", 5000);
 }
 
-//function imgproRun(){
-$("#imgrun-btn").click(function(){  
-    $('#loading').show();
-    $.ajax({
-	type: "GET",
-        url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/?img_path=' + $('img_path').val() + "&filter=" + $('input[name=filter]').val() + "&canny_sigma" + $('#canny_sigma_input').val() + "&option=" + $('#imgrun-btn').val(),
-        dataType: "json",
-	async: true,
-	success: function(data) {
-	   $('#loading').hide();
-        }
-    });
-//}
-});
 
 
 var app = angular.module("myApp", []).config(function($interpolateProvider) {

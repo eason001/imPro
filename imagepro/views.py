@@ -49,7 +49,7 @@ def index(request):
     img_path = request.GET.get("img_path","").strip()
     canny_sigma = request.GET.get("canny_sigma",1)
     img_counter = 0
-    print "option: " + str(option) + " path: " + img_path
+    print "option: " + str(option) + " path: " + img_path + " sigma: " + str(canny_sigma)
 
     if option == '1' and os.path.isdir(img_path) and img_path != "/":
 	filter = request.GET.get("filter","grayscale")
@@ -110,7 +110,8 @@ def transform(inputpath,filter,canny_sigma):
 	i = 0
 	if filter == 'canny':
 	        cutfile = open(inputpath + '/impro_out/' + filter + canny_sigma + '_processed_data', 'w')
-        cutfile = open(inputpath + '/impro_out/' + filter + '_processed_data', 'w')
+	else:
+	        cutfile = open(inputpath + '/impro_out/' + filter + '_processed_data', 'w')
 
         for file in os.listdir(inputpath):
 	  if file.lower().endswith(('.png','.jpg','.jpeg','.gif')):
@@ -198,8 +199,15 @@ def transform(inputpath,filter,canny_sigma):
         inputfile.close()
         n_data = str(counter)
 	if filter == 'canny':
-		result = "processed data set: " + n_data + " x " + n_features + " is saved as \n" + inputpath +  '/impro_out/' + filter + canny_sigma + '_processed_data ' + file_size + ' bytes'
-	result = "processed data set: " + n_data + " x " + n_features + " is saved as \n" + inputpath +  '/impro_out/' + filter + '_processed_data ' + file_size + ' bytes'
+		result = "File: " + filter + canny_sigma + '_processed_data </br>'
+		result += "Path: " + inputpath +  '/impro_out/ </br>'
+		result += "Dimension: " + n_data + " x " + n_features + "</br>"
+		result += "Size: " + file_size + ' bytes' 
+	else:	
+		result = "File: " + filter + "_processed_data </br>"
+		result += "Path: " + inputpath +  '/impro_out/ </br>'
+		result += "Dimension: " + n_data + " x " + n_features + "</br>"
+		result += "Size: " + file_size + ' bytes' 
 	print result
 
         context = {'n_data': n_data, 'n_features': n_features, 'result': result}

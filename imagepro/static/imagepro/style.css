@@ -7,7 +7,8 @@ body {
   p {font-size: 16px;}
   .margin {margin-bottom: 45px;}
   .bg-1 {
-      background-color: #1abc9c; /* Green */
+      background-image: url("http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/static/imagepro/main_bg.png");
+//    background-color: #1abc9c; /* Green */
       color: #ffffff;
   }
   .bg-2 {
@@ -45,16 +46,26 @@ body {
     bottom: 0;
     height: 300px;
     width: 100%;
-}
-
-#terminal-content{
-    position: absolute;
     background-color: #000000;
-    height:300px; /* or whatever width you want. */
+	
+}
+#terminal-title{
+    border: 2px solid #000000;
+    background-color: #000000;
+    border-radius: 4px;
+    color: #ffffff;
+
+}
+#terminal-body{
+    position: absolute;
+    background-color: #e0e0eb;
+    color: #0000cc;
+    font-size: 12px;
+    height:300px; 
     max-height:300px;    
     width: 100%;
     overflow-y:auto;
-    padding-bottom: 20px;
+    padding-bottom: 50px;
     padding-left: 20px;
     padding-top: 20px;
 }
@@ -81,6 +92,12 @@ body {
     padding-top:1px;
     margin-top:1px;
     font-size:16px;
+}
+#imgproResult{
+    color: #474e5d;
+}
+.modal-title{
+    color: #474e5d;
 }
 /*
 input[type=text]:focus {
