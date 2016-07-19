@@ -1,7 +1,11 @@
 $(document).ready(function(){
     $("#terminal-btn").click(function(){
-        $("#terminal").toggle();
+        $("#terminal").toggle(1000);
     });
+    $("#terminal-close").click(function(){
+        $("#terminal").close(1000);
+    });
+
     $(window).keydown(function(event){
      if(event.keyCode == 13) {
        event.preventDefault();
@@ -48,8 +52,12 @@ $(document).ready(function(){
 
 
 $("#imgrun-btn").click(function(){  
-if($('img_path').val()!='/' && $('img_info').html()!='invalid directory' && $('img_path').val()!=''){
-    $('#loading').show();
+if($('#img_path').val()!='/' 
+	&& $('#img_info').html()!='invalid directory' 
+	&& $('#img_path').val()!=''
+    ){
+//    $('#loadingA').show();
+    $('#loading').modal({backdrop: 'static', keyboard: false});
     var radios = document.getElementsByName('filter'), 
         value  = '';
 
@@ -61,7 +69,7 @@ if($('img_path').val()!='/' && $('img_info').html()!='invalid directory' && $('i
     }
     $.ajax({
 	type: "GET",
-        url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/?img_path=' + $('#img_path').val() + "&filter=" + value + "&canny_sigma=" + $('#canny_sigma_input').val() + "&option=" + $('#imgrun-btn').val(),
+        url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/?img_path=' + $('#img_path').val() + "&filter=" + value + "&canny_sigma=" + $('#canny_sigma_input').val() + "&option=" + $("#imgrun-btn").val(),
         dataType: "json",
 	async: true,
 	success: function(data) {
@@ -70,10 +78,12 @@ if($('img_path').val()!='/' && $('img_info').html()!='invalid directory' && $('i
 	     log_data = log_data + now + " </br> " + data.result
 	     $('#terminal-body').html(log_data);
 	     $('#imgproResult').html(data.result); 
-	     $('#loading').hide();
-	     $('#img-output').modal('show');
+	     $('#loading').modal('hide');
+//	     $('#loadingA').hide();
+//	     $('#img-output').modal('show');
  	     var elem = document.getElementById('terminal-body');
 	     elem.scrollTop = elem.scrollHeight;
+	     $('#terminal').show(1000);
         }
     });
 }
@@ -81,10 +91,43 @@ if($('img_path').val()!='/' && $('img_info').html()!='invalid directory' && $('i
 });
 
 
+$("#dimrun-btn").click(function(){  
+if($('#dim_path').val()!='/' 
+	&& $('#dim_info').html()!='invalid data file'
+	&& $('#dim_path').val()!=''
+    ){
+//    $('#loadingB').show();
+    $('#loading').modal({backdrop: 'static', keyboard: false});
+    var radios = document.getElementsByName('dim_red'), 
+        value  = '';
 
-
-
-
+    for (var i = radios.length; i--;) {
+        if (radios[i].checked) {
+            value = radios[i].value;
+            break;
+        }
+    }
+    $.ajax({
+	type: "GET",
+        url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/?dim_path=' + $('#dim_path').val() + "&dim_red=" + value + "&dim_k=" + $('#dim_k').val() + "&option=" + $("#dimrun-btn").val(),
+        dataType: "json",
+	async: true,
+	success: function(data) {
+	     var now = new Date($.now());
+	     var log_data = $('#terminal-body').html() + "</br></br>"
+	     log_data = log_data + now + " </br> " + data.result
+	     $('#terminal-body').html(log_data);
+	     $('#imgproResult').html(data.result); 
+	     $('#loading').modal('hide');
+	//   $('#loadingB').hide();
+//	     $('#img-output').modal('show');
+ 	     var elem = document.getElementById('terminal-body');
+	     elem.scrollTop = elem.scrollHeight;
+	     $('#terminal').show(1000);
+        }
+    });
+}
+});
 
 
 });
@@ -127,7 +170,7 @@ app.controller('appCtrl', function($scope, $http) {
                 xsrfCookieName: 'csrftoken'
             }
 
-    $scope.change = function($event) {
+    $scope.change_img = function($event) {
         var data = {
             img_path: $scope.img_path
         };
@@ -140,6 +183,21 @@ app.controller('appCtrl', function($scope, $http) {
         })
         .error(function (data, status, header, config) {
             $scope.img_info = 'Please enter a valid image directory';
+        });
+    };
+    $scope.change_dim = function($event) {
+        var data = {
+            dim_path: $scope.dim_path
+        };
+        var config = {
+                params: data
+            };
+        $http.get('http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/?dim_path=' + $scope.dim_path)
+        .success(function(response) {
+            $scope.dim_info = response.dim_info;
+        })
+        .error(function (data, status, header, config) {
+            $scope.dim_info = 'Please enter a valid data file';
         });
     };
 });

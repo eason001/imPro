@@ -47,9 +47,10 @@ def index(request):
     result = ""
     option = request.GET.get("option",0)
     img_path = request.GET.get("img_path","").strip()
+    dim_path = request.GET.get("dim_path","").strip()
     canny_sigma = request.GET.get("canny_sigma",1)
     img_counter = 0
-    print "option: " + str(option) + " path: " + img_path + " sigma: " + str(canny_sigma)
+    print "option: " + str(option) + " img_path: " + img_path + " sigma: " + str(canny_sigma) + " dim_path: " + dim_path
 
     if option == '1' and os.path.isdir(img_path) and img_path != "/":
 	filter = request.GET.get("filter","grayscale")
@@ -58,7 +59,7 @@ def index(request):
 	context = transform(img_path,filter,canny_sigma)		
 	return HttpResponse(json.dumps(context), content_type='application/json')
 #        return render(request, 'imagepro/index.html', context)
-
+#Image Processing
     if  img_path == "":
 	img_info = "please input a valid image directory"
         data = {'img_info': img_info}
@@ -75,7 +76,39 @@ def index(request):
         img_info = str(img_counter) + " images found"
         data = {'img_info': img_info}
 	return HttpResponse(json.dumps(data), content_type='application/json')
+#Dim Reduction
+    if  dim_path == "":
+	dim_info = "please input a valid data file"
+        data = {'dim_info': dim_info}
     
+    elif not os.path.isfile(dim_path):
+	dim_info = "invalid data file"
+        data = {'dim_info': dim_info}
+	return HttpResponse(json.dumps(data), content_type='application/json')
+    
+    else:
+	n_data = 0
+	n_feature = 0
+	dim_flag = True
+	dim_file = open(dim_path,'r')
+        for line in dim_file:
+		n_data += 1
+		if n_data == 1:
+			n_feature = len(line.split(" "))
+        	else:
+			if n_feature != len(line.split(" ")):
+				dim_flag = False
+				break
+	dim_file.close()
+	if dim_flag:		
+		dim_info = "Data set " + str(n_data) + " x " + str(n_feature)
+	else:
+		dim_info = "invalid data file: unbalanced data dimension"
+        data = {'dim_info': dim_info}
+	print data
+	return HttpResponse(json.dumps(data), content_type='application/json')
+    
+	
 	
 
     context = {'result': result}

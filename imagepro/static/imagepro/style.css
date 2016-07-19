@@ -3,6 +3,8 @@ body {
       font: 20px Montserrat, sans-serif;
       line-height: 1.8;
       color: #f5f6f7;
+      padding-right: 0px; 
+//      position: fixed;
   }
   p {font-size: 16px;}
   .margin {margin-bottom: 45px;}
@@ -40,6 +42,41 @@ body {
       color: #1abc9c !important;
   }
 
+.modal-open {
+overflow: hidden
+width: calc(100% - 17px) 
+}
+/*
+.modal-open {
+  overflow-y: auto;
+}*/
+/*
+body.modal-open {
+overflow-y: auto;
+}
+body.modal-close {
+overflow-y: auto;
+}
+*/
+
+/*
+body.modal-open {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow-y: scroll;
+}
+body.modal-close {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow-y: scroll;
+}
+*/
 #terminal {
     position: fixed;
     z-index:150;
@@ -99,8 +136,11 @@ body {
 .modal-title{
     color: #474e5d;
 }
-/*
+
 input[type=text]:focus {
     background-color: lightblue;
 }
-*/
+
+#dim_k{
+    color: #000000;
+}
