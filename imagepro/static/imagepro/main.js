@@ -1,9 +1,10 @@
 $(document).ready(function(){
     $("#terminal-btn").click(function(){
-        $("#terminal").toggle(1000);
+        $("#terminal").toggle(500);
     });
+
     $("#terminal-close").click(function(){
-        $("#terminal").close(1000);
+        $("#terminal").hide(500);
     });
 
     $(window).keydown(function(event){
@@ -83,7 +84,7 @@ if($('#img_path').val()!='/'
 //	     $('#img-output').modal('show');
  	     var elem = document.getElementById('terminal-body');
 	     elem.scrollTop = elem.scrollHeight;
-	     $('#terminal').show(1000);
+	     $('#terminal').show(500);
         }
     });
 }
@@ -123,7 +124,7 @@ if($('#dim_path').val()!='/'
 //	     $('#img-output').modal('show');
  	     var elem = document.getElementById('terminal-body');
 	     elem.scrollTop = elem.scrollHeight;
-	     $('#terminal').show(1000);
+	     $('#terminal').show(500);
         }
     });
 }
