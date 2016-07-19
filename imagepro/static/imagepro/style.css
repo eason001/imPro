@@ -4,13 +4,12 @@ body {
       line-height: 1.8;
       color: #f5f6f7;
       padding-right: 0px; 
-//      position: fixed;
   }
   p {font-size: 16px;}
   .margin {margin-bottom: 45px;}
   .bg-1 {
       background-image: url("http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/static/imagepro/main_bg.png");
-//    background-color: #1abc9c; /* Green */
+/*    background-color: #1abc9c; /* Green */
       color: #ffffff;
   }
   .bg-2 {
@@ -42,41 +41,10 @@ body {
       color: #1abc9c !important;
   }
 
-.modal-open {
+/*.modal-open {
 overflow: hidden
 width: calc(100% - 17px) 
-}
-/*
-.modal-open {
-  overflow-y: auto;
 }*/
-/*
-body.modal-open {
-overflow-y: auto;
-}
-body.modal-close {
-overflow-y: auto;
-}
-*/
-
-/*
-body.modal-open {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  overflow-y: scroll;
-}
-body.modal-close {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  overflow-y: scroll;
-}
-*/
 #terminal {
     position: fixed;
     z-index:150;

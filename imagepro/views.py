@@ -3,6 +3,7 @@ import django_fanout as fanout
 import psutil
 import time
 import os
+import re
 #from django.template.context_processors import csrf
 import json
 from django.http import HttpResponse
@@ -48,17 +49,25 @@ def index(request):
     option = request.GET.get("option",0)
     img_path = request.GET.get("img_path","").strip()
     dim_path = request.GET.get("dim_path","").strip()
-    canny_sigma = request.GET.get("canny_sigma",1)
     img_counter = 0
-    print "option: " + str(option) + " img_path: " + img_path + " sigma: " + str(canny_sigma) + " dim_path: " + dim_path
+
+    print "option: " + str(option) + " img_path: " + img_path + " dim_path: " + dim_path
 
     if option == '1' and os.path.isdir(img_path) and img_path != "/":
 	filter = request.GET.get("filter","grayscale")
-	print "filter: " + filter	
-	
+        canny_sigma = request.GET.get("canny_sigma",1)
+	print "filter: " + filter + " canny_sigma: " + canny_sigma		
 	context = transform(img_path,filter,canny_sigma)		
 	return HttpResponse(json.dumps(context), content_type='application/json')
-#        return render(request, 'imagepro/index.html', context)
+
+    if option == '2' and os.path.isfile(dim_path) and dim_path != "":
+	dim_red = request.GET.get("dim_red","pca").strip()
+        dim_k = request.GET.get("dim_k",2)
+	print "dim_red: " + dim_red + " K: " + dim_k		
+	context = reduce(dim_path,dim_red,dim_k)		
+	return HttpResponse(json.dumps(context), content_type='application/json')
+
+
 #Image Processing
     if  img_path == "":
 	img_info = "please input a valid image directory"
@@ -76,6 +85,8 @@ def index(request):
         img_info = str(img_counter) + " images found"
         data = {'img_info': img_info}
 	return HttpResponse(json.dumps(data), content_type='application/json')
+
+
 #Dim Reduction
     if  dim_path == "":
 	dim_info = "please input a valid data file"
@@ -245,3 +256,92 @@ def transform(inputpath,filter,canny_sigma):
 
         context = {'n_data': n_data, 'n_features': n_features, 'result': result}
 	return context
+
+
+
+def reduce(inputpath,alg,k):
+	from pyspark import SparkContext
+        from pyspark.sql import SQLContext, Row
+        from pyspark.mllib.linalg import Vectors
+        from pyspark import SparkConf, SparkContext
+	n_data = 0
+	n_features = 0
+	result = "successful!"
+	inputdir = os.path.dirname(inputpath)
+	print "inputdir: " + inputdir
+	inputfile = open(inputpath,'r')
+	for line in inputfile:
+                input_n = len(line.split(" "))
+                print "Selected data set has " + str(input_n) + " features"
+                break
+
+        inputfile.close()
+
+	if int(k) >= input_n:
+                print "reduced features must be smaller than input features."
+                result =  "reduced features must be smaller than input features."
+	else:
+		os.system("export _JAVA_OPTIONS='-Xms1g -Xmx40g'")
+		conf = (SparkConf().set("spark.driver.maxResultSize", "5g"))
+                sc = SparkContext(conf=conf)
+                sqlContext = SQLContext(sc)
+                lines = sc.textFile(inputpath).map(lambda x:x.split(" "))
+                lines = lines.map(lambda x:(x[0],[float(y) for y in x[1:]]))
+                df = lines.map(lambda x: Row(labels=x[0],features=Vectors.dense(x[1]))).toDF()
+	
+		if alg == "pca":
+			output_data = pca(inputdir,df,alg,k)
+			#os.system("spark-submit /home/ubuntu/yi-imPro/imagepro/pca.py " + inputpath + " " + k)
+
+		output_data = inputdir + "/" + alg + str(k) + "_Data"
+		inputfile = open(output_data, 'r')
+	       	file_size = str(os.stat(output_data).st_size )
+        	counter = 0
+  	     	n_features = '0'
+        	for line in inputfile:
+                	input_n = len(line.split(" "))
+                	n_features = str(input_n)
+                	counter += 1
+
+        	inputfile.close()
+        	n_data = str(counter)
+
+                result = "File: " + os.path.basename(output_data) + '</br>'
+                result += "Path: " + os.path.dirname(output_data) +  '/' + dim_red + str(k) + "_Features/" + '</br>'
+                result += "Dimension: " + n_data + " x " + n_features + "</br>"
+                result += "Size: " + file_size + ' bytes'
+		print result
+
+        context = {'n_data': n_data, 'n_features': n_features, 'result': result}
+	return context
+
+
+def pca(inputdir,df,alg,k):
+        from pyspark.ml.feature import PCA
+	pca = PCA(k=int(k),inputCol="features", outputCol="pca_features")
+        model = pca.fit(df)
+        outData = model.transform(df)
+        pcaFeatures = outData.select("labels","pca_features")
+	output_data = writeOut(inputdir,pcaFeatures,alg,k)
+	return output_data
+
+def writeOut(inputdir,df,alg,k):
+	output_dir = inputdir + "/" + alg + str(k) + "_Features"
+	output_data = inputdir + "/" + alg + str(k) + "_Data"
+	n_data = 0	
+	n_features = 0
+
+	df.rdd.repartition(1).saveAsTextFile(output_dir)
+        outputfile = open(output_data, 'w')
+        inputfile = open(output_dir + '/part-00000', 'r')
+        for line in inputfile:
+			n_data += 1
+                        x = line.split("[")[1].split("]")[0]
+                        x = re.sub(',','',x)
+                        y = line.split("'")[1]
+                        outputfile.write(y + " " + x + '\n')
+        inputfile.close()
+        outputfile.close()
+
+        print "Dimension reduction finished!"
+	return output_data
