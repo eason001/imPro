@@ -131,6 +131,46 @@ if($('#dim_path').val()!='/'
 });
 
 
+$("#clurun-btn").click(function(){  
+if($('#clu_path').val()!='/' 
+	&& $('#clu_info').html()!='invalid data file'
+	&& $('#clu_path').val()!=''
+    ){
+//    $('#loadingC').show();
+    $('#loading').modal({backdrop: 'static', keyboard: false});
+    var radios = document.getElementsByName('clu_alg'), 
+        value  = '';
+
+    for (var i = radios.length; i--;) {
+        if (radios[i].checked) {
+            value = radios[i].value;
+            break;
+        }
+    }
+    $.ajax({
+	type: "GET",
+        url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/?clu_path=' + $('#clu_path').val() + "&clu_alg=" + value + "&clu_k=" + $('#clu_k').val() + "&option=" + $("#clurun-btn").val(),
+        dataType: "json",
+	async: true,
+	success: function(data) {
+	     var now = new Date($.now());
+	     var log_data = $('#terminal-body').html() + "</br></br>"
+	     log_data = log_data + now + " </br> " + data.result
+	     $('#terminal-body').html(log_data);
+	     $('#imgproResult').html(data.result); 
+	     $('#loading').modal('hide');
+	//   $('#loadingC').hide();
+//	     $('#img-output').modal('show');
+ 	     var elem = document.getElementById('terminal-body');
+	     elem.scrollTop = elem.scrollHeight;
+	     $('#terminal').show(500);
+        }
+    });
+}
+});
+
+
+
 });
 /*
 window.setInterval(function() {
@@ -199,6 +239,21 @@ app.controller('appCtrl', function($scope, $http) {
         })
         .error(function (data, status, header, config) {
             $scope.dim_info = 'Please enter a valid data file';
+        });
+    };
+    $scope.change_clu = function($event) {
+        var data = {
+            clu_path: $scope.clu_path
+        };
+        var config = {
+                params: data
+            };
+        $http.get('http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/?clu_path=' + $scope.clu_path)
+        .success(function(response) {
+            $scope.clu_info = response.clu_info;
+        })
+        .error(function (data, status, header, config) {
+            $scope.clu_info = 'Please enter a valid data file';
         });
     };
 });

@@ -58,9 +58,10 @@ def index(request):
     option = request.GET.get("option",0)
     img_path = request.GET.get("img_path","").strip()
     dim_path = request.GET.get("dim_path","").strip()
+    clu_path = request.GET.get("clu_path","").strip()
     img_counter = 0
 
-    print "option: " + str(option) + " img_path: " + img_path + " dim_path: " + dim_path
+    print "option: " + str(option) + " img_path: " + img_path + " dim_path: " + dim_path + " clu_path: " + clu_path
 
     if option == '1' and os.path.isdir(img_path) and img_path != "/":
 	filter = request.GET.get("filter","grayscale")
@@ -74,8 +75,9 @@ def index(request):
 
 	t = threading.Thread(target=transform, args=(img_path,filter,canny_sigma), name='transform')
 	t.start()
-
-	result = "Processing " + img_path + " with " + filter + "</br>"
+	
+	result = "Job Submitted! </br>"
+	result += "Description: Processing " + img_path + " with " + filter + "</br>"
 
 	if filter == 'canny':
 		result += "File: " + filter + canny_sigma + '_processed_data </br>'
@@ -109,10 +111,42 @@ def index(request):
 	for file in dimfile:
 		n_data += 1
 
-	result = "Processing " + dim_path + " with " + dim_red + " k = " + str(dim_k) + "</br>"
+	result = "Job Submitted! </br>"
+	result += "Description: Processing " + dim_path + " with " + dim_red + " k = " + str(dim_k) + "</br>"
         result += "File: " + os.path.basename(output_data) + '</br>'
         result += "Path: " + os.path.dirname(output_data) +  '/' + dim_red + str(dim_k) + "_Features/" + '</br>'
         result += "Dimension: " + str(n_data) + " x " + str(dim_k) + "</br>"
+
+	print result
+
+        context = {'result': result}
+	return StreamingHttpResponse(json.dumps(context), content_type='application/json')
+
+#	context = reduce(dim_path,dim_red,dim_k)		
+#	return HttpResponse(json.dumps(context), content_type='application/json')
+
+    if option == '3' and os.path.isfile(clu_path) and clu_path != "":
+	clu_alg = request.GET.get("clu_alg","kmeans").strip()
+        clu_k = request.GET.get("clu_k",2)
+	print "clu_path: " + clu_path + " clu_alg: " + clu_alg + " K: " + clu_k		
+
+	c = threading.Thread(target=cluster, args=(clu_path,clu_alg,clu_k), name='cluster')
+	c.start()
+
+	inputdir = os.path.dirname(clu_path)
+	output_data = inputdir + "/" + clu_alg + str(clu_k) + "_Data"
+	print output_data
+	clufile = open(clu_path,'r')
+	n_data = 0
+
+	for file in clufile:
+		n_data += 1
+
+	result = "Job Submitted! </br>"
+	result += "Description: Processing " + clu_path + " with " + clu_alg + " k = " + str(clu_k) + "</br>"
+        result += "File: " + os.path.basename(output_data) + '</br>'
+        result += "Path: " + os.path.dirname(output_data) +  '/' + clu_alg + str(clu_k) + "_Features/" + '</br>'
+        result += "Dimension: " + str(n_data) + " x " + str(clu_k) + "</br>"
 
 	print result
 
@@ -173,6 +207,40 @@ def index(request):
         data = {'dim_info': dim_info}
 	print data
 	return HttpResponse(json.dumps(data), content_type='application/json')
+
+
+#Clustering
+    if  clu_path == "":
+	clu_info = "please input a valid data file"
+        data = {'clu_info': clu_info}
+    
+    elif not os.path.isfile(clu_path):
+	clu_info = "invalid data file"
+        data = {'clu_info': clu_info}
+	return HttpResponse(json.dumps(data), content_type='application/json')
+    
+    else:
+	n_data = 0
+	n_feature = 0
+	clu_flag = True
+	clu_file = open(clu_path,'r')
+        for line in clu_file:
+		n_data += 1
+		if n_data == 1:
+			n_feature = len(line.split(" "))
+        	else:
+			if n_feature != len(line.split(" ")):
+				clu_flag = False
+				break
+	clu_file.close()
+	if clu_flag:		
+		clu_info = "Data set " + str(n_data) + " x " + str(n_feature)
+	else:
+		clu_info = "invalid data file: unbalanced data dimension"
+        data = {'clu_info': clu_info}
+	print data
+	return HttpResponse(json.dumps(data), content_type='application/json')
+
     
     context = {'result': result}
     return render(request, 'imagepro/index.html', context)
@@ -378,6 +446,9 @@ def reduce(inputpath,alg,k):
                 result += "Dimension: " + n_data + " x " + n_features + "</br>"
                 result += "Size: " + file_size + ' bytes'
 		print result
+		sc.stop()		
+
+        print "Dimension reduction finished!"
 
         context = {'n_data': n_data, 'n_features': n_features, 'result': result}
 	return context
@@ -413,7 +484,106 @@ def writeOut(inputdir,df,alg,k):
         inputfile.close()
         outputfile.close()
 
-        print "Dimension reduction finished!"
+	return output_data
+
+
+def cluster(inputpath,alg,k):
+	from pyspark import SparkContext
+        from pyspark.sql import SQLContext, Row
+        from pyspark.mllib.linalg import Vectors
+        from pyspark import SparkConf, SparkContext
+	
+	n_data = 0
+	n_features = 0
+	result = "successful!"
+	inputdir = os.path.dirname(inputpath)
+	print "inputdir: " + inputdir + result
+	inputfile = open(inputpath,'r')
+	for line in inputfile:
+                input_n = len(line.split(" "))
+                n_data += 1
+		#print "Selected data set has " + str(input_n) + " features"
+                #break
+        inputfile.close()
+
+       # result = "File: " + os.path.basename(output_data) + '</br>'
+       # result += "Path: " + os.path.dirname(output_data) +  '/' + alg + str(k) + "_Features/" + '</br>'
+       # result += "Dimension: " + str(n_data) + " x " + str(n_features) + "</br>"
+       # context = {'result': result}
+       # yield context
+
+	if int(k) == 1:
+                print "k should be greater than 1"
+                result =  "k should be greater than 1"
+	else:
+		os.system("export _JAVA_OPTIONS='-Xms1g -Xmx40g'")
+		conf = (SparkConf().set("spark.driver.maxResultSize", "5g"))
+                sc = SparkContext(conf=conf)
+                sqlContext = SQLContext(sc)
+                lines = sc.textFile(inputpath).map(lambda x:x.split(" "))
+                lines = lines.map(lambda x:(x[0],[float(y) for y in x[1:]]))
+                df = lines.map(lambda x: Row(labels=x[0],features=Vectors.dense(x[1]))).toDF()
+	
+		if alg == "kmeans":
+			output_data = kmeans(inputdir,df,alg,k)
+			#os.system("spark-submit /home/ubuntu/yi-imPro/imagepro/pca.py " + inputpath + " " + k)
+
+		output_data = inputdir + "/" + alg + str(k) + "_Data"
+		inputfile = open(output_data, 'r')
+	       	file_size = str(os.stat(output_data).st_size )
+        	counter = 0
+  	     	n_features = '0'
+        	for line in inputfile:
+                	input_n = len(line.split(" "))
+                	n_features = str(input_n)
+                	counter += 1
+
+        	inputfile.close()
+        	n_data = str(counter)
+
+                result = "File: " + os.path.basename(output_data) + '</br>'
+                result += "Path: " + os.path.dirname(output_data) +  '/' + alg + str(k) + "_Features/" + '</br>'
+                result += "Dimension: " + n_data + " x " + n_features + "</br>"
+                result += "Size: " + file_size + ' bytes'
+		print result
+		sc.stop()		
+
+        print "Clustering finished!"
+
+        context = {'n_data': n_data, 'n_features': n_features, 'result': result}
+	return context
+
+
+def kmeans(inputdir,df,alg,k):
+	from pyspark.ml.clustering import KMeans
+        from numpy import array
+        from math import sqrt	
+	kmeans = KMeans(k=int(k), seed=1,initSteps=5, tol=1e-4, maxIter=20, initMode="k-means||", featuresCol="features")
+        model = kmeans.fit(df)
+        kmFeatures = model.transform(df).select("labels", "prediction")
+	output_data = writeOutClu(inputdir,kmFeatures,alg,k)
+	return output_data
+
+def writeOutClu(inputdir,df,alg,k):
+	output_dir = inputdir + "/" + alg + str(k) + "_Features"
+	output_data = inputdir + "/" + alg + str(k) + "_Data"
+	n_data = 0	
+	n_features = 0
+	
+	if os.path.isdir(output_dir):
+        	os.system("rm -r " + output_dir)
+	
+	df.rdd.repartition(1).saveAsTextFile(output_dir)
+        outputfile = open(output_data, 'w')
+        inputfile = open(output_dir + '/part-00000', 'r')
+        for line in inputfile:
+			n_data += 1
+                        x = line.split("=")[2].split(")")[0]
+                        y = line.split("'")[1]
+                        outputfile.write(y + " " + x + '\n')
+        inputfile.close()
+        outputfile.close()
+
 	return output_data
 
 
