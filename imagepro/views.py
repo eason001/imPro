@@ -561,10 +561,18 @@ def kmeans(inputdir,df,alg,k):
 	kmeans = KMeans(k=int(k), seed=1,initSteps=5, tol=1e-4, maxIter=20, initMode="k-means||", featuresCol="features")
         model = kmeans.fit(df)
         kmFeatures = model.transform(df).select("labels", "prediction")
-	output_data = writeOutClu(inputdir,kmFeatures,alg,k)
+        erFeatures = model.transform(df).select("features", "prediction")
+	###Evaluation
+        rows = erFeatures.collect()
+        WSSSE = 0
+        for i in rows:
+		WSSSE += sqrt(sum([x**2 for x in (model.clusterCenters()[i[1]]-i[0])]))
+        print("Within Set Sum of Squared Error = " + str(WSSSE))
+
+	output_data = writeOutClu(inputdir,kmFeatures,alg,k,WSSSE)
 	return output_data
 
-def writeOutClu(inputdir,df,alg,k):
+def writeOutClu(inputdir,df,alg,k,WSSSE):
 	output_dir = inputdir + "/" + alg + str(k) + "_Features"
 	output_data = inputdir + "/" + alg + str(k) + "_Data"
 	n_data = 0	
@@ -576,6 +584,7 @@ def writeOutClu(inputdir,df,alg,k):
 	df.rdd.repartition(1).saveAsTextFile(output_dir)
         outputfile = open(output_data, 'w')
         inputfile = open(output_dir + '/part-00000', 'r')
+	outputfile.write("Within Set Sum of Squared Error = " + str(WSSSE) + '\n')
         for line in inputfile:
 			n_data += 1
                         x = line.split("=")[2].split(")")[0]

@@ -59,7 +59,7 @@ width: calc(100% - 17px)
     background-color: #000000;
     border-radius: 4px;
     color: #ffffff;
-
+    padding-left: 20px;
 }
 #terminal-body{
     position: absolute;
