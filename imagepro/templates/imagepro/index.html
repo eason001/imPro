@@ -210,11 +210,56 @@
 
 </div>
 
+
 <!-- Third Container (Grid) -->
 <div class="container-fluid bg-3 text-center" id="cluster">
-  <h3 class="margin">Clustering</h3><br>
-  <img src="{% static 'imagepro/csoon.jpg' %}" class="img-responsive img-circle margin" style="display:inline" alt="Coming soon . . ." width="350" height="350">
-  <h3>. . .</h3>
+  <h3 class="margin">Clustering</h3>
+  <div class="row">
+    <div class="col-sm-4"> <div class="pull-right"><span class="glyphicon glyphicon-text-size"></span> Data file</div></div>
+    <div class="col-sm-4">
+      <input type="text" ng-model="clu_path" ng-change="change_clu($event)" id="clu_path" class="form-control" id="clu_path" name="clu_path" value="">
+    </div>
+    <div class="col-sm-4"><div class="pull-left" id="clu_info">{$ clu_info $}</div></div>
+  </div>
+
+  <div class="row" id="clu_selector">
+    <div class="col-sm-3" align="center">
+    </div>
+    <div class="col-sm-3" align="center">
+      <div align="center" style="padding-top: 20px">
+	<div class="radio">
+  	  <label>
+   	   <input type="radio" name="clu_alg" id="KMeans" value="kmeans" checked="checked">
+		KMeans
+  	  </label>
+	</div>
+       </div>
+    </div>
+    <div class="col-sm-3" align="center">
+      <div align="center" style="padding-top: 20px">
+	<div class="radio">
+  	  <label>
+   	   <input type="radio" name="clu_alg" id="nmf" value="nmf" disabled="true">
+		NMF
+  	  </label>
+	</div>
+       </div>
+    </div>
+    <div class="col-sm-3" align="center">
+    </div>
+  </div>
+  </br>
+    K = <input type="number" maxlength="3" min="2" max="20" step="1" id="clu_k" name="clu_k" value="2">&nbsp;&nbsp;&nbsp;
+    <button id="clurun-btn" type="submit" class="btn btn-default" name="option" value="3">
+       <span class="glyphicon glyphicon-play"> Run</span>
+    </button>
+  <div>
+    <div id="loadingC" style="display:none;">
+      <h3>Please Wait . . .</h3>
+      <img src="{% static 'imagepro/ajax-loader.gif'%}" alt="loading" />
+    </div>
+  </div>
+
 </div>
 
 </form>
