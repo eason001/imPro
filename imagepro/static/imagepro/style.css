@@ -8,19 +8,22 @@ body {
   p {font-size: 16px;}
   .margin {margin-bottom: 45px;}
   .bg-1 {
-      background-image: url("/static/imagepro/main_bg.png");
+      background-image: url("/static/imagepro/main_bg0");
 /*    background-color: #1abc9c; /* Green */
       color: #ffffff;
   }
   .bg-2 {
-      background-color: #474e5d; /* Dark Blue */
+      background-image: url("/static/imagepro/main_bg1");
+/*      background-color: #474e5d; /* Dark Blue */
       color: #ffffff;
   }
   .bg-3 {
-      background-color: #ffffff; /* White */
+      background-image: url("/static/imagepro/main_bg2");
+/*      background-color: #ffffff; /* White */
       color: #555555;
   }
   .bg-4 {
+/*      background-image: url("/static/imagepro/main_bg3");*/
       background-color: #2f2f2f; /* Black Gray */
       color: #fff;
   }
