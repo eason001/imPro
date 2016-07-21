@@ -47,7 +47,7 @@ $(document).ready(function(){
             if(value == 'skeleton'){
                 image_name = "sample_skeleton.png";
             }
-	    image_name = 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/static/imagepro/' + image_name
+	    image_name = "static/imagepro/" + image_name
              $('#transformed').attr('src', image_name);
         });
 
@@ -70,7 +70,7 @@ if($('#img_path').val()!='/'
     }
     $.ajax({
 	type: "GET",
-        url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/?img_path=' + $('#img_path').val() + "&filter=" + value + "&canny_sigma=" + $('#canny_sigma_input').val() + "&option=" + $("#imgrun-btn").val(),
+        url: '/?img_path=' + $('#img_path').val() + "&filter=" + value + "&canny_sigma=" + $('#canny_sigma_input').val() + "&option=" + $("#imgrun-btn").val(),
         dataType: "json",
 	async: true,
 	success: function(data) {
@@ -110,7 +110,7 @@ if($('#dim_path').val()!='/'
     }
     $.ajax({
 	type: "GET",
-        url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/?dim_path=' + $('#dim_path').val() + "&dim_red=" + value + "&dim_k=" + $('#dim_k').val() + "&option=" + $("#dimrun-btn").val(),
+        url: '/?dim_path=' + $('#dim_path').val() + "&dim_red=" + value + "&dim_k=" + $('#dim_k').val() + "&option=" + $("#dimrun-btn").val(),
         dataType: "json",
 	async: true,
 	success: function(data) {
@@ -149,7 +149,7 @@ if($('#clu_path').val()!='/'
     }
     $.ajax({
 	type: "GET",
-        url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/?clu_path=' + $('#clu_path').val() + "&clu_alg=" + value + "&clu_k=" + $('#clu_k').val() + "&option=" + $("#clurun-btn").val(),
+        url: '/?clu_path=' + $('#clu_path').val() + "&clu_alg=" + value + "&clu_k=" + $('#clu_k').val() + "&option=" + $("#clurun-btn").val(),
         dataType: "json",
 	async: true,
 	success: function(data) {
@@ -187,7 +187,7 @@ client.subscribe('/test', function (data) {
 */
 function refresh() {
     $.ajax({
-        url: 'http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/imagepro/terminal/',
+        url: '/imagepro/terminal/',
         success: function(data) {
             $('#terminal-content').html(data);
         }
@@ -218,7 +218,7 @@ app.controller('appCtrl', function($scope, $http) {
         var config = {
                 params: data
             };
-        $http.get('http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/?img_path=' + $scope.img_path)
+        $http.get('/?img_path=' + $scope.img_path)
         .success(function(response) {
             $scope.img_info = response.img_info;
         })
@@ -233,7 +233,7 @@ app.controller('appCtrl', function($scope, $http) {
         var config = {
                 params: data
             };
-        $http.get('http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/?dim_path=' + $scope.dim_path)
+        $http.get('/?dim_path=' + $scope.dim_path)
         .success(function(response) {
             $scope.dim_info = response.dim_info;
         })
@@ -248,7 +248,7 @@ app.controller('appCtrl', function($scope, $http) {
         var config = {
                 params: data
             };
-        $http.get('http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/?clu_path=' + $scope.clu_path)
+        $http.get('/?clu_path=' + $scope.clu_path)
         .success(function(response) {
             $scope.clu_info = response.clu_info;
         })

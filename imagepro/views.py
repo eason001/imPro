@@ -24,6 +24,15 @@ from scipy import ndimage as ndi
 import math
 from skimage.morphology import skeletonize
 from django.views.decorators.http import condition
+from pyspark import SparkContext
+from pyspark.sql import SQLContext, Row
+from pyspark.mllib.linalg import Vectors
+from pyspark import SparkConf, SparkContext
+
+os.system("export _JAVA_OPTIONS='-Xms1g -Xmx40g'")
+conf = (SparkConf().set("spark.driver.maxResultSize", "5g"))
+sc = SparkContext(conf=conf)
+sqlContext = SQLContext(sc)
 
 
 def as_gray(image_filter, image, *args, **kwargs):
@@ -77,7 +86,7 @@ def index(request):
 	t.start()
 	
 	result = "Job Submitted! </br>"
-	result += "Description: Processing " + img_path + " with " + filter + "</br>"
+	result += "Description: Processing <font color='red'>" + img_path + "</font> with <font color='red'>" + filter + "</font></br>"
 
 	if filter == 'canny':
 		result += "File: " + filter + canny_sigma + '_processed_data </br>'
@@ -112,7 +121,7 @@ def index(request):
 		n_data += 1
 
 	result = "Job Submitted! </br>"
-	result += "Description: Processing " + dim_path + " with " + dim_red + " k = " + str(dim_k) + "</br>"
+	result += "Description: Processing <font color='red'>" + dim_path + "</font> with <font color='red'>" + dim_red + " k = " + str(dim_k) + "</font></br>"
         result += "File: " + os.path.basename(output_data) + '</br>'
         result += "Path: " + os.path.dirname(output_data) +  '/' + dim_red + str(dim_k) + "_Features/" + '</br>'
         result += "Dimension: " + str(n_data) + " x " + str(dim_k) + "</br>"
@@ -143,7 +152,7 @@ def index(request):
 		n_data += 1
 
 	result = "Job Submitted! </br>"
-	result += "Description: Processing " + clu_path + " with " + clu_alg + " k = " + str(clu_k) + "</br>"
+	result += "Description: Processing <font color='red'>" + clu_path + "</font> with <font color='red'>" + clu_alg + " k = " + str(clu_k) + "</font></br>"
         result += "File: " + os.path.basename(output_data) + '</br>'
         result += "Path: " + os.path.dirname(output_data) +  '/' + clu_alg + str(clu_k) + "_Features/" + '</br>'
         result += "Dimension: " + str(n_data) + " x " + str(clu_k) + "</br>"
@@ -389,10 +398,6 @@ def transform(inputpath,filter,canny_sigma):
 
 
 def reduce(inputpath,alg,k):
-	from pyspark import SparkContext
-        from pyspark.sql import SQLContext, Row
-        from pyspark.mllib.linalg import Vectors
-        from pyspark import SparkConf, SparkContext
 	n_data = 0
 	n_features = 0
 	result = "successful!"
@@ -416,10 +421,10 @@ def reduce(inputpath,alg,k):
                 print "reduced features must be smaller than input features."
                 result =  "reduced features must be smaller than input features."
 	else:
-		os.system("export _JAVA_OPTIONS='-Xms1g -Xmx40g'")
-		conf = (SparkConf().set("spark.driver.maxResultSize", "5g"))
-                sc = SparkContext(conf=conf)
-                sqlContext = SQLContext(sc)
+#		os.system("export _JAVA_OPTIONS='-Xms1g -Xmx40g'")
+#		conf = (SparkConf().set("spark.driver.maxResultSize", "5g"))
+ #               sc = SparkContext(conf=conf)
+  #              sqlContext = SQLContext(sc)
                 lines = sc.textFile(inputpath).map(lambda x:x.split(" "))
                 lines = lines.map(lambda x:(x[0],[float(y) for y in x[1:]]))
                 df = lines.map(lambda x: Row(labels=x[0],features=Vectors.dense(x[1]))).toDF()
@@ -446,7 +451,7 @@ def reduce(inputpath,alg,k):
                 result += "Dimension: " + n_data + " x " + n_features + "</br>"
                 result += "Size: " + file_size + ' bytes'
 		print result
-		sc.stop()		
+#		sc.stop()		
 
         print "Dimension reduction finished!"
 
@@ -488,10 +493,6 @@ def writeOut(inputdir,df,alg,k):
 
 
 def cluster(inputpath,alg,k):
-	from pyspark import SparkContext
-        from pyspark.sql import SQLContext, Row
-        from pyspark.mllib.linalg import Vectors
-        from pyspark import SparkConf, SparkContext
 	
 	n_data = 0
 	n_features = 0
@@ -516,10 +517,10 @@ def cluster(inputpath,alg,k):
                 print "k should be greater than 1"
                 result =  "k should be greater than 1"
 	else:
-		os.system("export _JAVA_OPTIONS='-Xms1g -Xmx40g'")
-		conf = (SparkConf().set("spark.driver.maxResultSize", "5g"))
-                sc = SparkContext(conf=conf)
-                sqlContext = SQLContext(sc)
+#		os.system("export _JAVA_OPTIONS='-Xms1g -Xmx40g'")
+#		conf = (SparkConf().set("spark.driver.maxResultSize", "5g"))
+ #               sc = SparkContext(conf=conf)
+  #              sqlContext = SQLContext(sc)
                 lines = sc.textFile(inputpath).map(lambda x:x.split(" "))
                 lines = lines.map(lambda x:(x[0],[float(y) for y in x[1:]]))
                 df = lines.map(lambda x: Row(labels=x[0],features=Vectors.dense(x[1]))).toDF()
@@ -546,7 +547,7 @@ def cluster(inputpath,alg,k):
                 result += "Dimension: " + n_data + " x " + n_features + "</br>"
                 result += "Size: " + file_size + ' bytes'
 		print result
-		sc.stop()		
+#		sc.stop()		
 
         print "Clustering finished!"
 

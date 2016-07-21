@@ -8,7 +8,7 @@ body {
   p {font-size: 16px;}
   .margin {margin-bottom: 45px;}
   .bg-1 {
-      background-image: url("http://ec2-107-22-17-1.compute-1.amazonaws.com:8000/static/imagepro/main_bg.png");
+      background-image: url("/static/imagepro/main_bg.png");
 /*    background-color: #1abc9c; /* Green */
       color: #ffffff;
   }
