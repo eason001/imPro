@@ -19,10 +19,11 @@ $(document).ready(function(){
   max_bg = 4;
   bg_1 = getRandomInt(0,max_bg);
   $('.bg-1').css('background-image', 'url(' + '/static/imagepro/main_bg' + bg_1 + ')');
-  bg_2 = getRandomInt(0,max_bg);
+/*  bg_2 = getRandomInt(0,max_bg);
   $('.bg-2').css('background-image', 'url(' + '/static/imagepro/main_bg' + bg_2 + ')');
   bg_3 = getRandomInt(0,max_bg);
   $('.bg-3').css('background-image', 'url(' + '/static/imagepro/main_bg' + bg_3 + ')');
+*/
 /*    
     $(function(){
       refresh();
