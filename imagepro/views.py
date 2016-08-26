@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from multiprocessing.pool import ThreadPool
-import django_fanout as fanout
+#import django_fanout as fanout
 import subprocess
 import psutil
 import time
@@ -26,7 +26,7 @@ from skimage.morphology import skeletonize
 from django.views.decorators.http import condition
 from pyspark import SparkContext
 from pyspark.sql import SQLContext, Row
-from pyspark.mllib.linalg import Vectors
+from pyspark.ml.linalg import Vectors
 from pyspark import SparkConf, SparkContext
 
 os.system("export _JAVA_OPTIONS='-Xms1g -Xmx40g'")
